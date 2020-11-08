@@ -42,5 +42,57 @@ function createInputSlider(name, min, max, step, initial, callback) {
 
   document.body.appendChild(box);
   callback(initial);
-  return box;
+  return { box };
+}
+
+function createPreset(name) {
+  const box = document.createElement('div');
+  box.classList.add('preset');
+
+  const label = document.createElement('label');
+  label.innerText = name;
+  box.appendChild(label);
+
+  const items = [];
+
+  const usePresetButton = document.createElement('span');
+  usePresetButton.innerText = 'Use this preset';
+  usePresetButton.addEventListener('click', () => {
+    console.log(items);
+  });
+  box.appendChild(usePresetButton);
+
+  const ul = document.createElement('ul');
+  box.appendChild(ul);
+
+  const addItem = item => {
+    const li = document.createElement('li');
+    li.setAttribute('data-url', item);
+
+    items.push(item);
+    
+    const img = document.createElement('img');
+    img.setAttribute('src', item);
+    li.appendChild(img);
+
+    ul.appendChild(li);
+  };
+
+  const addItems = items => items.forEach(item => addItem(item));
+
+  document.body.appendChild(box);
+  return { box, items, addItem, addItems };
+}
+
+function createPresets(url, callback) {
+  fetch(url).then(response => response.json()).then(presets => {
+    const baseUrl = url.split('/').slice(0,-1).join('/');
+    for (const name in presets) {
+      const { addItem } = createPreset(name[0].toUpperCase() + name.slice(1));
+      for (const path of presets[name].dataset) {
+        addItem(`${baseUrl}/${name}/${path}`);
+      }
+    }
+    if (callback) callback();
+  });
 }

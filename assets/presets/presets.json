@@ -1,0 +1,7 @@
+{
+  "pipes": {
+    "nSize": 20,
+    "dataset": ["pipes-0.png", "pipes-1.png", "pipes-2.png", "pipes-3.png", "pipes-4.png"],
+    "configuration": {}
+  }
+}
