@@ -1,0 +1,147 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 62.5%;
+  font-family: sans-serif;
+}
+
+body {
+  font-size: 1.8rem;
+}
+
+.configurator {
+  padding: 1rem;
+  width: 30rem;
+
+  & > label {
+    display: block;
+  }
+
+  & > ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    min-height: 3rem;
+    & > li {
+      padding: 1rem;
+      border-bottom: 1px solid #cccccc;
+      display: grid;
+      grid-template-columns: min-content auto;
+
+      & > img {
+        pointer-events: none;
+        align-self: center;
+      }
+
+      &:last-of-type {
+        border-bottom: 0;
+      }
+    }
+  }
+}
+
+.configurator-box {
+  position: relative;
+  width: 20rem;
+  height: 20rem;
+  justify-self: center;
+
+  .direction-box {
+    position: absolute;
+    display: grid;
+    grid-gap: 1rem;
+
+    &.n {
+      left: 50%;
+      top: 0;
+    }
+
+    &.e {
+      left: 0;
+      top: 50%;
+    }
+
+    &.s {
+      left: 50%;
+      bottom: 0;
+    }
+
+    &.w {
+      right: 0;
+      top: 50%;
+    }
+
+    &.n, &.s {
+      transform: translate(-50%, 0);
+      grid-auto-flow: column;
+    }
+
+    &.e, &.w {
+      transform: translate(0, -50%);
+      grid-auto-flow: row;
+    }
+
+    img {
+      box-shadow: 0 0 .5rem red;
+      filter: grayscale(100%);
+      
+      &.selected {
+        box-shadow: 0 0 .5rem green;
+        filter: none;
+      }
+    }
+  }
+
+  & > img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.preset {
+  padding: 1rem;
+  width: 30rem;
+
+  & > label {
+    display: block;
+  }
+
+  span {
+    font-size: 1.4rem;
+    
+    &:hover {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
+
+  ul {
+    list-style: none;
+    margin: 1rem 0 0 0;
+    padding: 0;
+    width: fit-content;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 1rem;
+
+    li {
+      display: flex; 
+      
+      img {
+        user-select: none;
+      }
+    }
+  }
+}
+
+.labeled-checkbox {
+  label, input {
+    font-size: 1.6rem;
+    cursor: pointer;
+  }
+}

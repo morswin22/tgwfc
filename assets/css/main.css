@@ -1,0 +1,169 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 62.5%;
+  font-family: sans-serif;
+}
+
+body {
+  font-size: 1.8rem;
+}
+
+.configurator {
+  padding: 1rem;
+  width: 30rem;
+}
+
+.configurator > label {
+  display: block;
+}
+
+.configurator > ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0 0;
+  min-height: 3rem;
+}
+
+.configurator > ul > li {
+  padding: 1rem;
+  border-bottom: 1px solid #cccccc;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: min-content auto;
+      grid-template-columns: -webkit-min-content auto;
+      grid-template-columns: min-content auto;
+}
+
+.configurator > ul > li > img {
+  pointer-events: none;
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+}
+
+.configurator > ul > li:last-of-type {
+  border-bottom: 0;
+}
+
+.configurator-box {
+  position: relative;
+  width: 20rem;
+  height: 20rem;
+  -ms-grid-column-align: center;
+      justify-self: center;
+}
+
+.configurator-box .direction-box {
+  position: absolute;
+  display: -ms-grid;
+  display: grid;
+  grid-gap: 1rem;
+}
+
+.configurator-box .direction-box.n {
+  left: 50%;
+  top: 0;
+}
+
+.configurator-box .direction-box.e {
+  left: 0;
+  top: 50%;
+}
+
+.configurator-box .direction-box.s {
+  left: 50%;
+  bottom: 0;
+}
+
+.configurator-box .direction-box.w {
+  right: 0;
+  top: 50%;
+}
+
+.configurator-box .direction-box.n, .configurator-box .direction-box.s {
+  -webkit-transform: translate(-50%, 0);
+          transform: translate(-50%, 0);
+  grid-auto-flow: column;
+}
+
+.configurator-box .direction-box.e, .configurator-box .direction-box.w {
+  -webkit-transform: translate(0, -50%);
+          transform: translate(0, -50%);
+  grid-auto-flow: row;
+}
+
+.configurator-box .direction-box img {
+  -webkit-box-shadow: 0 0 .5rem red;
+          box-shadow: 0 0 .5rem red;
+  -webkit-filter: grayscale(100%);
+          filter: grayscale(100%);
+}
+
+.configurator-box .direction-box img.selected {
+  -webkit-box-shadow: 0 0 .5rem green;
+          box-shadow: 0 0 .5rem green;
+  -webkit-filter: none;
+          filter: none;
+}
+
+.configurator-box > img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+}
+
+.preset {
+  padding: 1rem;
+  width: 30rem;
+}
+
+.preset > label {
+  display: block;
+}
+
+.preset span {
+  font-size: 1.4rem;
+}
+
+.preset span:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.preset ul {
+  list-style: none;
+  margin: 1rem 0 0 0;
+  padding: 0;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 1rem;
+}
+
+.preset ul li {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.preset ul li img {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.labeled-checkbox label, .labeled-checkbox input {
+  font-size: 1.6rem;
+  cursor: pointer;
+}

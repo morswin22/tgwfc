@@ -56,7 +56,7 @@ function createLabeledCheckbox(name, initial, callback) {
   const checkbox = document.createElement('input');
   checkbox.setAttribute('type', 'checkbox');
   checkbox.addEventListener('change', () => callback(checkbox.checked));
-  if (initial) checkbox.setAttribute('checked');
+  if (initial) checkbox.setAttribute('checked', 'checked');
   label.appendChild(checkbox);
 
   callback(checkbox.checked);
@@ -83,14 +83,19 @@ function createPreset(name, setItems) {
 
   const addItem = item => {
     const li = document.createElement('li');
-    li.setAttribute('data-url', item);
 
-    items.push(item);
-    
     const img = document.createElement('img');
     img.setAttribute('src', item);
+    img.setAttribute('draggable', 'draggable');
+    img.addEventListener('dragstart', event => {
+      localStorage.setItem('dragged-preset-item', event.target.getAttribute('src'));
+    });
+    img.addEventListener('dragend', () => {
+      localStorage.removeItem('dragged-preset-item');
+    });
     li.appendChild(img);
-
+    
+    items.push(item);
     ul.appendChild(li);
   };
 
@@ -116,6 +121,7 @@ function createPresets(url, setItems, callback) {
 function createConfiguratorBox(name, configuration) {
   const box = document.createElement('div');
   box.classList.add('configurator-box');
+  box.setAttribute('data-url', name);
 
   for (const direction in configuration[name]) {
     const directionBox = document.createElement('div');
@@ -164,15 +170,35 @@ function createConfigurator(useTransformations) {
 
   let configurationBox;
   const itemsBox = document.createElement('ul');
+  itemsBox.addEventListener('drop', event => {
+    event.preventDefault();
+    const received = localStorage.getItem('dragged-preset-item');
+    if (received) {
+      addItem(received);
+      updateConfigurator();
+    }
+  });
+  itemsBox.addEventListener('dragover', event => {
+    event.preventDefault();
+  })
   const configuration = {};
 
   const updateConfigurator = () => {
     const directions = ['n','e','s','w'];
     for (const item in configuration) {
+      const previous = configuration[item];
       configuration[item] = {};
       for (const direction of directions) {
-        // TODO Keep previous state, the following line is resetting the state
-        configuration[item][direction] = Object.fromEntries(Object.keys(configuration).map(key => [key, false]))
+        configuration[item][direction] = Object.fromEntries(Object.keys(configuration).map(key => [key, Object.keys(previous).length ? previous[direction][key] : false]))
+      }
+    }
+    if (configurationBox) {
+      const attachedTo = configurationBox.getAttribute('data-url');
+      const parent = document.querySelector(`.configurator > ul > li[data-url="${attachedTo}"]`);
+      if (parent) {
+        configurationBox.remove();
+        configurationBox = createConfiguratorBox(attachedTo, configuration).box;
+        parent.appendChild(configurationBox);
       }
     }
   }
