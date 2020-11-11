@@ -44,6 +44,7 @@ body {
 }
 
 .configurator-box {
+  pointer-events: none;
   position: relative;
   width: 20rem;
   height: 20rem;
@@ -85,8 +86,10 @@ body {
     }
 
     img {
+      pointer-events: all;
       box-shadow: 0 0 .5rem red;
       filter: grayscale(100%);
+      cursor: pointer;
       
       &.selected {
         box-shadow: 0 0 .5rem green;
@@ -100,6 +103,22 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  & > span {
+    pointer-events: all;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: -.3rem;
+    right: -.3rem;
+    width: 1rem;
+    height: 1rem;
+    border: .3rem solid #505050;
+    border-radius: .3rem;
+    background: 
+      linear-gradient(45deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0) 43%,#fff 45%,#fff 55%,rgba(0,0,0,0) 57%,rgba(0,0,0,0) 100%), 
+      linear-gradient(135deg, #505050 0%,#505050 43%,#fff 45%,#fff 55%,#505050 57%,#505050 100%);
   }
 }
 

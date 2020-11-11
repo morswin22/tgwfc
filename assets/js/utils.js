@@ -63,7 +63,7 @@ function createLabeledCheckbox(name, initial, callback) {
   return { box };
 }
 
-function createPreset(name, setItems) {
+function createPreset(name, fromPreset) {
   const box = document.createElement('div');
   box.classList.add('preset');
 
@@ -72,10 +72,11 @@ function createPreset(name, setItems) {
   box.appendChild(label);
 
   const items = [];
+  const configuration = {};
 
   const usePresetButton = document.createElement('span');
   usePresetButton.innerText = 'Use this preset';
-  usePresetButton.addEventListener('click', () => setItems(items));
+  usePresetButton.addEventListener('click', () => fromPreset(items, configuration));
   box.appendChild(usePresetButton);
 
   const ul = document.createElement('ul');
@@ -101,24 +102,38 @@ function createPreset(name, setItems) {
 
   const addItems = items => items.forEach(addItem);
 
+  const applyConfiguration = newConfiguration => {
+    const dirs = ['n','e','s','w'];
+    for (const i in newConfiguration) {
+      configuration[items[i]] = {};
+      for (const dir in newConfiguration[i]) {
+        configuration[items[i]][dirs[dir]] = {};
+        for (const j in newConfiguration[i][dir]) {
+          configuration[items[i]][dirs[dir]][items[j]] = !!newConfiguration[i][dir][j];
+        }
+      }
+    }
+  }
+
   document.body.appendChild(box);
-  return { box, items, addItem, addItems };
+  return { box, items, addItem, addItems, applyConfiguration };
 }
 
-function createPresets(url, setItems, callback) {
+function createPresets(url, fromPreset, callback) {
   fetch(url).then(response => response.json()).then(presets => {
     const baseUrl = url.split('/').slice(0,-1).join('/');
     for (const name in presets) {
-      const { addItem } = createPreset(name[0].toUpperCase() + name.slice(1), setItems);
+      const { addItem, applyConfiguration } = createPreset(name[0].toUpperCase() + name.slice(1), fromPreset);
       for (const path of presets[name].dataset) {
         addItem(`${baseUrl}/${name}/${path}`);
       }
+      applyConfiguration(presets[name].configuration);
     }
     if (callback) callback();
   });
 }
 
-function createConfiguratorBox(name, configuration) {
+function createConfiguratorBox(name, configuration, resetConfigurationBox) {
   const box = document.createElement('div');
   box.classList.add('configurator-box');
   box.setAttribute('data-url', name);
@@ -157,6 +172,10 @@ function createConfiguratorBox(name, configuration) {
   img.setAttribute('src', name);
   box.appendChild(img);
 
+  const closeButton = document.createElement('span');
+  closeButton.addEventListener('click', resetConfigurationBox);
+  box.appendChild(closeButton);
+
   return { box };
 }
 
@@ -169,6 +188,11 @@ function createConfigurator(useTransformations) {
   box.appendChild(label);
 
   let configurationBox;
+  const resetConfigurationBox = () => {
+    if (configurationBox) configurationBox.remove();
+    configurationBox = undefined;
+  }
+
   const itemsBox = document.createElement('ul');
   itemsBox.addEventListener('drop', event => {
     event.preventDefault();
@@ -197,7 +221,7 @@ function createConfigurator(useTransformations) {
       const parent = document.querySelector(`.configurator > ul > li[data-url="${attachedTo}"]`);
       if (parent) {
         configurationBox.remove();
-        configurationBox = createConfiguratorBox(attachedTo, configuration).box;
+        configurationBox = createConfiguratorBox(attachedTo, configuration, resetConfigurationBox).box;
         parent.appendChild(configurationBox);
       }
     }
@@ -219,8 +243,8 @@ function createConfigurator(useTransformations) {
       const itemElement = document.createElement('li');
       itemElement.setAttribute('data-url', item);
       itemElement.addEventListener('click', ({ target }) => {
-        if (configurationBox) configurationBox.remove();
-        configurationBox = createConfiguratorBox(target.getAttribute('data-url'), configuration).box;
+        resetConfigurationBox();
+        configurationBox = createConfiguratorBox(target.getAttribute('data-url'), configuration, resetConfigurationBox).box;
         target.appendChild(configurationBox);
       });
     
@@ -231,10 +255,7 @@ function createConfigurator(useTransformations) {
       itemsBox.appendChild(itemElement);
     }
   };
-  const addItems = items => {
-    items.forEach(addItem);
-    updateConfigurator();
-  }
+  const addItems = items => items.forEach(addItem);
 
   const removeItem = item => {
     if (configuration[item] !== undefined) {
@@ -242,16 +263,23 @@ function createConfigurator(useTransformations) {
       for (const child of Array.from(itemsBox.children)) if (child.getAttribute('data-url') === item) child.remove();
     } 
   };
-  const removeItems = items => {
-    items.forEach(removeItem);
-    updateConfigurator();
-  }
+  const removeItems = items => items.forEach(removeItem);
 
-  const setItems = items => {
+  const fromPreset = (items, presetConfiguration) => {
     clearItems();
+    resetConfigurationBox();
     addItems(items);
+    for (const item in presetConfiguration) {
+      configuration[item] = {};
+      for (const direction in presetConfiguration[item]) {
+        configuration[item][direction] = {};
+        for (const key in presetConfiguration[item][direction]) {
+          configuration[item][direction][key] = presetConfiguration[item][direction][key];
+        }
+      }
+    }
   };
 
   document.body.appendChild(box);
-  return { configuration, clearItems, setItems, addItem, addItems, removeItem, removeItems, box, updateConfigurator };
+  return { configuration, clearItems, fromPreset, addItem, addItems, removeItem, removeItems, box, updateConfigurator, resetConfigurationBox };
 }
