@@ -1,12 +1,20 @@
-let nSize;
+const globalEvents = createEvents();
 
 function setup() {
   createCanvas(400, 400);
 
-  const { fromPreset } = createConfigurator();
+  const generator = createGenerator();
+  const { fromPreset, configuration } = createConfigurator();
   createPresets('/assets/presets/presets.json', fromPreset);
-  // createInputSlider('n size', 2, 64, 2, 16, value => nSize = value);
 
+  createButton('Use loaded').mousePressed(() => {
+    generator.setConfiguration(configuration);
+  });
+
+}
+
+function windowResized() {
+  globalEvents.emit('resized', [windowWidth, windowHeight]);
 }
 
 function draw() {

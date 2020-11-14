@@ -40,9 +40,56 @@ function createInputSlider(name, min, max, step, initial, callback) {
     clearInterval(sliderInterval);
   });
 
+  const updateConfiguration = configuration => {
+    for (const key in configuration) {
+      const value = configuration[key];
+      switch (key) {
+        case 'name':
+          label.innerText = value;
+          name = value;
+          break;
+        case 'min':
+          slider.setAttribute('min', value);
+          input.setAttribute('min', value);
+          min = value;
+          break;
+        case 'max':
+          slider.setAttribute('max', value);
+          input.setAttribute('max', value);
+          max = value;
+          break;
+        case 'step':
+          slider.setAttribute('step', value);
+          input.setAttribute('step', value);
+          step = value;
+          break;
+        case 'initial':
+          slider.setAttribute('value', value);
+          input.setAttribute('value', value);
+          initial = value;
+          break;
+        case 'callback':
+          callback = value;
+          input.addEventListener('change', getEventHandler(input, slider));
+          slider.addEventListener('change', getEventHandler(slider, input));
+          slider.addEventListener('mousedown', () => {
+            clearInterval(sliderInterval);
+            sliderInterval = setInterval(getEventHandler(slider, input), 50);
+          });
+          slider.addEventListener('mouseup', () => {
+            clearInterval(sliderInterval);
+          });
+          break;
+      }
+    }
+    let value = parseInt(slider.value);
+    if (isNaN(value)) value = initial;
+    callback(value);
+  }
+
   document.body.appendChild(box);
   callback(initial);
-  return { box };
+  return { box, updateConfiguration };
 }
 
 function createLabeledCheckbox(name, initial, callback) {
@@ -282,4 +329,15 @@ function createConfigurator(useTransformations) {
 
   document.body.appendChild(box);
   return { configuration, clearItems, fromPreset, addItem, addItems, removeItem, removeItems, box, updateConfigurator, resetConfigurationBox };
+}
+
+function createEvents() {
+  const listeners = {};
+
+  const on = (event, callback) => listeners[event] ? listeners[event].push(callback) : listeners[event] = [callback];
+  const off = (event, callback) => listeners[event]?.splice(listeners[event]?.findIndex(listener => listener === callback), 1);
+  const once = (event, callback) => on(event, value => off(event, callback, callback(value)));
+  const emit = (event, value) => listeners[event]?.forEach(listener => listener(value)); 
+
+  return { on, off, once, emit };
 }
