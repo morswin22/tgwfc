@@ -126,9 +126,8 @@ function createGenerator() {
   }
 
   const propagate = (x, y, collapsed) => {
-    // TODO This only propagates to nearest siblings but it needs to propagate further
     const neighboursPossibleStates = Object.values(configuration[collapsed]);
-    const neighboursPositions = [[y-1, x], [y, x+1], [y+1, x], [y, x-1], ];
+    const neighboursPositions = [[y-1, x], [y, x-1], [y+1, x], [y, x+1]];
     for (let i = 0; i < neighboursPositions.length; i++) {
       const [ny, nx] = neighboursPositions[i];
       if (ny >= 0 && ny < wave.length && nx >= 0 && nx < wave[ny].length) {

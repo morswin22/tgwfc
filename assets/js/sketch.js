@@ -2,7 +2,6 @@ const globalEvents = createEvents();
 
 function setup() {
   createCanvas(400, 400);
-  background(51);
 
   const generator = createGenerator();
   const { fromPreset, configuration } = createConfigurator();
@@ -14,6 +13,7 @@ function setup() {
   createButton('Start collapsing').mousePressed(generator.iterate);
 
   generator.on('redraw', ([wave, tiles]) => {
+    background(255);
     for (let i = 0; i < wave.length; i++) {
       for (let j = 0; j < wave[i].length; j++) {
         const possible = Object.entries(wave[i][j]).filter(([, state]) => state).flatMap(([tile, ]) => tile)
