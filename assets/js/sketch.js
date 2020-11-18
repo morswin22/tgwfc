@@ -1,16 +1,25 @@
 const globalEvents = createEvents();
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(20, 20);
 
   const generator = createGenerator();
   const { fromPreset, configuration } = createConfigurator();
   createPresets('/assets/presets/presets.json', fromPreset);
+  
+  const { add: addButton } = createMenu();
+  addButton('/assets/images/presets.svg', 'Presets', '.presets');
+  addButton('/assets/images/generator.svg', 'Generator', '.generator');
+  addButton('/assets/images/configurator.svg', 'Configurator', '.configurator');
 
-  createButton('Use loaded').mousePressed(() => generator.setConfiguration(configuration));
+  generator.resetButton.addEventListener('click', () => {
+    generator.setConfiguration(configuration);
+    generator.resetWave();
+  });
 
-  createButton('Reset wave').mousePressed(generator.resetWave);
-  createButton('Start collapsing').mousePressed(generator.iterate);
+  generator.runButton.addEventListener('click', () => {
+    generator.iterate();
+  });
 
   generator.on('redraw', ([wave, tiles]) => {
     background(255);

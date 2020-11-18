@@ -16,6 +16,10 @@ const loader = (() => {
 })();
 
 function createGenerator() {
+  const box = document.createElement('div');
+  box.classList.add('generator');
+  document.body.appendChild(box);
+
   let configuration;
   let tiles;
   let nSize;
@@ -48,12 +52,24 @@ function createGenerator() {
 
   // TODO If width or height changed then resetWave
   const widthInput = createInputSlider('Width', nSize*2, windowWidth, nSize, nSize*5, value => emit('resized', width = Math.ceil(value/nSize)*nSize));
+  widthInput.box.remove();
+  box.appendChild(widthInput.box);
   const heightInput = createInputSlider('Height', nSize*2, windowHeight, nSize, nSize*5, value => emit('resized', height = Math.ceil(value/nSize)*nSize));
+  heightInput.box.remove();
+  box.appendChild(heightInput.box);
 
   const updateInputs = configuration => {
     widthInput.updateConfiguration(configuration);
     heightInput.updateConfiguration(configuration);
   };
+
+  const resetButton = document.createElement('span');
+  resetButton.innerText = 'Reset the wave';
+  box.appendChild(resetButton);
+
+  const runButton = document.createElement('span');
+  runButton.innerText = 'Run';
+  box.appendChild(runButton);
 
   if (globalEvents) {
     globalEvents.on('resized', ([width, height]) => {
@@ -138,5 +154,5 @@ function createGenerator() {
     }
   }
 
-  return { setConfiguration, resetWave, iterate, on };
+  return { setConfiguration, resetWave, iterate, on, resetButton, runButton };
 }

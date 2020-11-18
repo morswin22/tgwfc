@@ -1,4 +1,4 @@
-html, body {
+html, body, main {
   margin: 0;
   padding: 0;
   width: 100vw;
@@ -12,9 +12,105 @@ body {
   font-size: 1.8rem;
 }
 
+main {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-color: #f1f4f8;
+}
+
+main canvas {
+  background-color: #fff;
+}
+
+.menu {
+  padding: 1rem;
+  min-width: 10rem;
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  -webkit-transform: translate(-50%, 0);
+          transform: translate(-50%, 0);
+  background: #fff;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  color: #202124;
+  font-size: 2rem;
+  padding: .9rem 1.6rem;
+  line-height: 1.3;
+  font-weight: normal;
+  margin: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.menu img {
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  color: #202124;
+}
+
+.shown {
+  display: initial !important;
+}
+
+.generator {
+  padding: 1rem;
+  width: 25rem;
+  position: fixed;
+  display: none;
+  bottom: 4rem;
+  left: 4rem;
+  background: #fff;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  color: #202124;
+  padding: .9rem 1.6rem;
+  line-height: 1.3;
+  font-weight: normal;
+  margin: 0;
+}
+
+.generator span {
+  margin: .5rem 0;
+  font-size: 1.4rem;
+  display: block;
+}
+
+.generator span:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .configurator {
   padding: 1rem;
   width: 30rem;
+  position: fixed;
+  display: none;
+  top: 4rem;
+  right: 4rem;
+  background: #fff;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  color: #202124;
+  padding: .9rem 1.6rem;
+  line-height: 1.3;
+  font-weight: normal;
+  margin: 0;
 }
 
 .configurator > label {
@@ -52,8 +148,8 @@ body {
 .configurator-box {
   pointer-events: none;
   position: relative;
-  width: 20rem;
-  height: 20rem;
+  width: 45rem;
+  height: 45rem;
   -ms-grid-column-align: center;
       justify-self: center;
 }
@@ -135,9 +231,21 @@ body {
   background: linear-gradient(45deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 43%, #fff 45%, #fff 55%, rgba(0, 0, 0, 0) 57%, rgba(0, 0, 0, 0) 100%), linear-gradient(135deg, #505050 0%, #505050 43%, #fff 45%, #fff 55%, #505050 57%, #505050 100%);
 }
 
-.preset {
+.presets {
   padding: 1rem;
-  width: 30rem;
+  min-width: 12rem;
+  position: fixed;
+  top: 4rem;
+  left: 4rem;
+  display: none;
+  background: #fff;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  color: #202124;
+  padding: .9rem 1.6rem;
+  line-height: 1.3;
+  font-weight: normal;
+  margin: 0;
 }
 
 .preset > label {
@@ -180,7 +288,26 @@ body {
           user-select: none;
 }
 
+.input-slider {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+
+.input-slider label {
+  width: 5rem;
+}
+
+.input-slider input[type="number"] {
+  width: 5rem;
+  border: 0;
+  outline: 0;
+}
+
 .labeled-checkbox label, .labeled-checkbox input {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   cursor: pointer;
 }

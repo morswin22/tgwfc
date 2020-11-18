@@ -167,17 +167,23 @@ function createPreset(name, fromPreset) {
 }
 
 function createPresets(url, fromPreset, callback) {
+  const box = document.createElement('div');
+  box.classList.add('presets');
+  document.body.appendChild(box);
   fetch(url).then(response => response.json()).then(presets => {
     const baseUrl = url.split('/').slice(0,-1).join('/');
     for (const name in presets) {
-      const { addItem, applyConfiguration } = createPreset(name[0].toUpperCase() + name.slice(1), fromPreset);
+      const { addItem, applyConfiguration, box: presetBox } = createPreset(name[0].toUpperCase() + name.slice(1), fromPreset);
       for (const path of presets[name].dataset) {
         addItem(`${baseUrl}/${name}/${path}`);
       }
       applyConfiguration(presets[name].configuration);
+      presetBox.remove();
+      box.appendChild(presetBox);
     }
     if (callback) callback();
   });
+  return { box };
 }
 
 function createConfiguratorBox(name, configuration, resetConfigurationBox) {
@@ -340,4 +346,31 @@ function createEvents() {
   const emit = (event, value) => listeners[event]?.forEach(listener => listener(value)); 
 
   return { on, off, once, emit };
+}
+
+function createMenu() {
+  const box = document.createElement('div');
+  box.classList.add('menu');
+  document.body.appendChild(box);
+
+  const selectors = {};
+
+  const add = (imageURL, title, selector) => {
+    const selected = document.querySelector(selector);
+    const image = document.createElement('img');
+    image.setAttribute('src', imageURL);
+    image.setAttribute('alt', title);
+    image.setAttribute('title', title);
+    image.addEventListener('click', () => {
+      if (selected.classList.contains('shown')) {
+        selected.classList.remove('shown');
+      } else {
+        selected.classList.add('shown');
+      }
+    });
+    box.appendChild(image);
+    return selectors[selector] = image;
+  }
+
+  return { box, add };
 }
