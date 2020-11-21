@@ -106,8 +106,11 @@ main {
   & > ul {
     list-style: none;
     padding: 0;
-    margin: 1rem 0 0 0;
+    margin: 0;
     min-height: 3rem;
+    max-height: 70vh;
+    overflow-y: auto;
+
     & > li {
       padding: 1rem;
       border-bottom: 1px solid #cccccc;
@@ -129,14 +132,21 @@ main {
 .configurator-box {
   pointer-events: none;
   position: relative;
-  width: 45rem;
-  height: 45rem;
+  width: 21rem;
+  height: 15rem;
   justify-self: center;
 
   .direction-box {
     position: absolute;
-    display: grid;
-    grid-gap: 1rem;
+    pointer-events: all;
+    width: 3.6rem;
+    background: #fff;
+    border: 1px solid #dfe1e5;
+    border-radius: 8px;
+    color: #202124;
+    padding: .9rem 1.2rem;
+    line-height: 1.3;
+    font-weight: normal;
 
     &.n {
       left: 50%;
@@ -144,7 +154,7 @@ main {
     }
 
     &.e {
-      left: 0;
+      right: 0;
       top: 50%;
     }
 
@@ -154,54 +164,34 @@ main {
     }
 
     &.w {
-      right: 0;
+      left: 0;
       top: 50%;
     }
 
     &.n, &.s {
       transform: translate(-50%, 0);
-      grid-auto-flow: column;
     }
 
     &.e, &.w {
       transform: translate(0, -50%);
-      grid-auto-flow: row;
-    }
-
-    img {
-      pointer-events: all;
-      box-shadow: 0 0 .5rem red;
-      filter: grayscale(100%);
-      cursor: pointer;
-      
-      &.selected {
-        box-shadow: 0 0 .5rem green;
-        filter: none;
-      }
     }
   }
 
-  & > img {
+  & > img:nth-of-type(1) {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
   }
 
-  & > span {
+  & > img:nth-of-type(2) {
     pointer-events: all;
-    font-size: 1.5rem;
     cursor: pointer;
     position: absolute;
-    top: -.3rem;
-    right: -.3rem;
-    width: 1rem;
-    height: 1rem;
-    border: .3rem solid #505050;
-    border-radius: .3rem;
-    background: 
-      linear-gradient(45deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0) 43%,#fff 45%,#fff 55%,rgba(0,0,0,0) 57%,rgba(0,0,0,0) 100%), 
-      linear-gradient(135deg, #505050 0%,#505050 43%,#fff 45%,#fff 55%,#505050 57%,#505050 100%);
+    top: 0;
+    right: 0;
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 
@@ -220,9 +210,17 @@ main {
   line-height: 1.3;
   font-weight: normal;
   margin: 0;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .preset {
+  margin-bottom: 1.5rem;
+
+  &:nth-last-child(1) {
+    margin-bottom: 0;
+  }
+
   & > label {
     display: block;
   }

@@ -1,10 +1,13 @@
 const globalEvents = createEvents();
+let redraw = false;
 
 function setup() {
   createCanvas(20, 20);
 
   const generator = createGenerator();
-  const { fromPreset, configuration } = createConfigurator();
+  generator.on('update', event => redraw = event);
+
+  const { fromPreset, getConfiguration } = createConfigurator();
   createPresets('/assets/presets/presets.json', fromPreset);
   
   const { add: addButton } = createMenu();
@@ -12,31 +15,8 @@ function setup() {
   addButton('/assets/images/generator.svg', 'Generator', '.generator');
   addButton('/assets/images/configurator.svg', 'Configurator', '.configurator');
 
-  generator.resetButton.addEventListener('click', () => {
-    generator.setConfiguration(configuration);
-    generator.resetWave();
-  });
-
-  generator.runButton.addEventListener('click', () => {
-    generator.iterate();
-  });
-
-  generator.on('redraw', ([wave, tiles]) => {
-    background(255);
-    for (let i = 0; i < wave.length; i++) {
-      for (let j = 0; j < wave[i].length; j++) {
-        const possible = Object.entries(wave[i][j]).filter(([, state]) => state).flatMap(([tile, ]) => tile)
-        if (possible.length === tiles.length) continue;
-        const opacity = 1 - possible.length / tiles.length;
-        tint(255, opacity * 255);
-        for (const tile of possible) {
-          const img = loader.get(tile);
-          image(img, img.width * j, img.height * i);
-        }
-      }
-    }
-    setTimeout(generator.iterate, 0);
-  });
+  generator.resetButton.addEventListener('click', () => generator.setConfiguration(getConfiguration()));
+  generator.solveButton.addEventListener('click', generator.iterate);
 }
 
 function windowResized() {
@@ -45,4 +25,21 @@ function windowResized() {
 
 function mousePressed() {
   globalEvents.emit('pressed', [mouseX, mouseY]);
+}
+
+function draw() {
+  if (!redraw) return;
+  background(255);
+  const [ wave, tiles ] = redraw;
+  for (let i = 0; i < wave.length; i++) {
+    for (let j = 0; j < wave[i].length; j++) {
+      if (wave[i][j].length === tiles.length) continue;
+      tint(255, 255 / wave[i][j].length);
+      for (const tile of wave[i][j]) {
+        const img = loader.get(tile);
+        image(img, img.width * j, img.height * i);
+      }
+    }
+  }
+  redraw = false;
 }

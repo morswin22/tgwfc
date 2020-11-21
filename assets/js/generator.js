@@ -17,7 +17,7 @@ const loader = (() => {
 
 function createGenerator() {
   const box = document.createElement('div');
-  box.classList.add('generator');
+  box.classList.add('generator', 'shown');
   document.body.appendChild(box);
 
   let configuration;
@@ -39,6 +39,7 @@ function createGenerator() {
         // TODO If nSize changed then resetWave
         nSize = loader.get(tiles[0]).width;
         updateInputs({ min: nSize*2, step: nSize, initial: nSize*5 });
+        resetWave();
       }
     };
     loader.on('loaded', onReady);
@@ -64,12 +65,12 @@ function createGenerator() {
   };
 
   const resetButton = document.createElement('span');
-  resetButton.innerText = 'Reset the wave';
+  resetButton.innerText = 'Reset';
   box.appendChild(resetButton);
 
-  const runButton = document.createElement('span');
-  runButton.innerText = 'Run';
-  box.appendChild(runButton);
+  const solveButton = document.createElement('span');
+  solveButton.innerText = 'Solve';
+  box.appendChild(solveButton);
 
   if (globalEvents) {
     globalEvents.on('resized', ([width, height]) => {
@@ -80,13 +81,12 @@ function createGenerator() {
       if (x > 0 && x < width && y > 0 && y < height) {
         x = Math.floor(x / nSize);
         y = Math.floor(y / nSize);
-        const picked = [random(tiles), random(tiles), random(tiles)];
-        for (const tile of tiles) {
-          if (picked.indexOf(tile) !== -1) {
-            wave[y][x][tile] = false;
-          }
-        }
-        console.log('changed at', x, 'x', y, 'to', picked);
+        // TODO Add a way to select painting tile
+        // wave[y][x] = ['/assets/presets/pipes/pipes-0.png'];
+        // wave[y][x] = ['/assets/presets/buch/rocks-top.png'];
+        wave[y][x] = ['/assets/presets/buch/none.png'];
+        propagate([x, y]);
+        emit('update', [wave, tiles]);
       }
     });
   }
@@ -98,61 +98,99 @@ function createGenerator() {
     for (let i = 0; i < h; i++) {
       wave[i] = [];
       for (let j = 0; j < w; j++) {
-        wave[i][j] = Object.fromEntries(tiles.map(tile => [tile, true]));
+        wave[i][j] = [ ...tiles ];
       }
     }
+    console.log(wave);
   };
 
   const iterate = () => {
-    const [x, y] = getMinEntropy();
-    if (x !== undefined && y !== undefined) {
-      const collapsed = collapse(x, y);
-      propagate(x, y, collapsed);
-      emit('redraw', [wave, tiles]);
+    const minimal = getMinEntropy();
+    if (minimal) {
+      collapse(minimal);
+      propagate(minimal);
+      setTimeout(iterate, 0);
+      emit('update', [wave, tiles]);
     } else {
-      console.log('Algorithm: Contradictory state');
+      console.log('Complete');
     }
   };
 
   const getMinEntropy = () => {
-    let min = tiles.length;
-    let x, y;
+    let min = tiles.length + 1;
+    let minimal = undefined;
     for (let i = 0; i < wave.length; i++) {
       for (let j = 0; j < wave[i].length; j++) {
-        const sum = Object.values(wave[i][j]).reduce((value, acc) => acc + value);
-        if (sum > 1 && min > sum) {
-          min = wave[i][j];
-          x = j;
-          y = i;
+        if (min > wave[i][j].length && wave[i][j].length > 1) {
+          min = wave[i][j].length;
+          minimal = [j, i];
         }
       }
     }
-    return [x, y];
-  }
+    return minimal;
+  };
 
-  const collapse = (x, y) => {
-    // TODO Use distributions for random picking tiles
-    const picked = random(Object.entries(wave[y][x]).filter(([, state]) => state).flatMap(([tile, ]) => tile));
-    for (const tile of tiles) {
-      if (tile !== picked) {
-        wave[y][x][tile] = false;
+  const collapse = ([x, y]) => {
+    // forces a tile to collapse, with randomness and rules followage
+    // ex. pole should have really low chance as well as the rock
+    wave[y][x] = [random(wave[y][x])];
+  };
+
+  const propagate = (origin) => {
+    const checked = [origin];
+    const stack = [...getNeighbours(origin)];
+    while (stack.length) {
+      const current = stack.shift();
+      checked.push(current);
+      const currentNeighbours = getNeighbours(current);
+      const canBe = {n:{},e:{},s:{},w:{}};
+      for (const neighbour of currentNeighbours) {
+        const dx = neighbour[0] - current[0];
+        const dy = neighbour[1] - current[1];
+        const connections = dx === 1 ? ['w','e'] : dx === -1 ? ['e','w'] : dy === -1 ? ['s','n'] : dy === 1 ? ['n','s'] : null;
+        for (const neighbourTile of wave[neighbour[1]][neighbour[0]]) {
+          for (const tile of wave[current[1]][current[0]]) {
+            if (hasCommon(configuration[neighbourTile][connections[0]], configuration[tile][connections[1]])) {
+              canBe[connections[1]][tile] = true;
+            }
+          }
+        }
+      }
+      const combined = getCommons(Object.entries(canBe).flatMap(([, value]) => [Object.keys(value)]));
+      wave[current[1]][current[0]] = combined;
+      if (combined.length < tiles.length) {
+        getNeighbours(current).filter(([x, y]) => !checked.find(([sx, sy]) => x === sx && y === sy)).filter(([x, y]) => !stack.find(([sx, sy]) => x === sx && y === sy)).forEach(neighbour => stack.push(neighbour));
       }
     }
-    return picked;
-  }
+  };
 
-  const propagate = (x, y, collapsed) => {
-    const neighboursPossibleStates = Object.values(configuration[collapsed]);
-    const neighboursPositions = [[y-1, x], [y, x-1], [y+1, x], [y, x+1]];
-    for (let i = 0; i < neighboursPositions.length; i++) {
-      const [ny, nx] = neighboursPositions[i];
-      if (ny >= 0 && ny < wave.length && nx >= 0 && nx < wave[ny].length) {
-        for (const tile in wave[ny][nx]) {
-          if (neighboursPossibleStates[i][tile] === false) wave[ny][nx][tile] = false; 
+  const getNeighbours = ([x, y]) => [[x+1,y],[x-1,y],[x,y-1],[x,y+1]].filter(([x, y]) => y >= 0 && y < wave.length && x >= 0 && x < wave[y].length);
+
+  const hasCommon = (a1, a2) => {
+    for (let i = 0; i < a1.length; i++) {
+      for (let j = 0; j < a2.length; j++) {
+        if (a1[i] === a2[j]) {
+          return true;
         }
       }
     }
+    return false;
+  };
+
+  const getCommons = arrays => {
+    const seen = {};
+    const max = arrays.reduce((acc, value) => acc + !!value.length, 0);
+    for (const array of arrays) {
+      for (const item of array) {
+        if (item in seen) {
+          seen[item] += 1;
+        } else {
+          seen[item] = 1;
+        }
+      }
+    }
+    return Object.entries(seen).filter(([, value]) => max === value).flatMap(([key, ]) => key);
   }
 
-  return { setConfiguration, resetWave, iterate, on, resetButton, runButton };
+  return { setConfiguration, resetWave, iterate, on, resetButton, solveButton };
 }

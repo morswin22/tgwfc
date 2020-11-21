@@ -119,7 +119,7 @@ function createPreset(name, fromPreset) {
   box.appendChild(label);
 
   const items = [];
-  const configuration = {};
+  let configuration = {};
 
   const usePresetButton = document.createElement('span');
   usePresetButton.innerText = 'Use this preset';
@@ -149,18 +149,7 @@ function createPreset(name, fromPreset) {
 
   const addItems = items => items.forEach(addItem);
 
-  const applyConfiguration = newConfiguration => {
-    const dirs = ['n','e','s','w'];
-    for (const i in newConfiguration) {
-      configuration[items[i]] = {};
-      for (const dir in newConfiguration[i]) {
-        configuration[items[i]][dirs[dir]] = {};
-        for (const j in newConfiguration[i][dir]) {
-          configuration[items[i]][dirs[dir]][items[j]] = !!newConfiguration[i][dir][j];
-        }
-      }
-    }
-  }
+  const applyConfiguration = (baseUrl, name, newConfiguration) => configuration = Object.fromEntries(Object.entries(newConfiguration).map((([key, value]) => [`${baseUrl}/${name}/${key}`, value])));
 
   document.body.appendChild(box);
   return { box, items, addItem, addItems, applyConfiguration };
@@ -168,7 +157,7 @@ function createPreset(name, fromPreset) {
 
 function createPresets(url, fromPreset, callback) {
   const box = document.createElement('div');
-  box.classList.add('presets');
+  box.classList.add('presets', 'shown');
   document.body.appendChild(box);
   fetch(url).then(response => response.json()).then(presets => {
     const baseUrl = url.split('/').slice(0,-1).join('/');
@@ -177,7 +166,7 @@ function createPresets(url, fromPreset, callback) {
       for (const path of presets[name].dataset) {
         addItem(`${baseUrl}/${name}/${path}`);
       }
-      applyConfiguration(presets[name].configuration);
+      applyConfiguration(baseUrl, name, presets[name].configuration);
       presetBox.remove();
       box.appendChild(presetBox);
     }
@@ -190,34 +179,16 @@ function createConfiguratorBox(name, configuration, resetConfigurationBox) {
   const box = document.createElement('div');
   box.classList.add('configurator-box');
   box.setAttribute('data-url', name);
+  const humanDirections = {n: 'North', e: 'East', w: 'West', s: 'South'};
 
   for (const direction in configuration[name]) {
-    const directionBox = document.createElement('div');
+    const directionBox = document.createElement('input');
     directionBox.classList.add('direction-box', direction);
-
-    for (const item in configuration[name][direction]) {
-      const itemBox = document.createElement('img');
-      itemBox.setAttribute('src', item);
-      itemBox.setAttribute('data-direction', direction);
-      itemBox.addEventListener('click', event => {
-        event.stopImmediatePropagation();
-        const direction = event.target.getAttribute('data-direction');
-        const item = event.target.getAttribute('src');
-        configuration[name][direction][item]= !configuration[name][direction][item];
-        if (configuration[name][direction][item]) {
-          event.target.classList.add('selected');
-        } else {
-          event.target.classList.remove('selected');
-        }
-      });
-      if (configuration[name][direction][item]) {
-        itemBox.classList.add('selected');
-      } else {
-        itemBox.classList.remove('selected');
-      }
-      directionBox.appendChild(itemBox);
-    }
-
+    directionBox.value = configuration[name][direction].join(' ');
+    directionBox.setAttribute('placeholder', humanDirections[direction]);
+    directionBox.setAttribute('data-direction', direction);
+    directionBox.addEventListener('click', event => event.stopImmediatePropagation());
+    directionBox.addEventListener('keyup', event => configuration[name][event.target.getAttribute('data-direction')] = event.target.value.split(/\W+/));
     box.appendChild(directionBox);
   }
 
@@ -225,16 +196,20 @@ function createConfiguratorBox(name, configuration, resetConfigurationBox) {
   img.setAttribute('src', name);
   box.appendChild(img);
 
-  const closeButton = document.createElement('span');
-  closeButton.addEventListener('click', resetConfigurationBox);
+  const closeButton = document.createElement('img');
+  closeButton.setAttribute('src', '/assets/images/check.svg');
+  closeButton.addEventListener('click', event => {
+    event.stopImmediatePropagation();
+    resetConfigurationBox();
+  });
   box.appendChild(closeButton);
 
   return { box };
 }
 
-function createConfigurator(useTransformations) {
+function createConfigurator() {
   const box = document.createElement('div');
-  box.classList.add('configurator');
+  box.classList.add('configurator', 'shown');
 
   const label = document.createElement('label');
   label.innerText = 'Configure tiles connectivity';
@@ -258,7 +233,8 @@ function createConfigurator(useTransformations) {
   itemsBox.addEventListener('dragover', event => {
     event.preventDefault();
   })
-  const configuration = {};
+  let configuration = {};
+  const getConfiguration = () => configuration;
 
   const updateConfigurator = () => {
     const directions = ['n','e','s','w'];
@@ -266,7 +242,7 @@ function createConfigurator(useTransformations) {
       const previous = configuration[item];
       configuration[item] = {};
       for (const direction of directions) {
-        configuration[item][direction] = Object.fromEntries(Object.keys(configuration).map(key => [key, Object.keys(previous).length ? previous[direction][key] : false]))
+        configuration[item][direction] = previous[direction] && previous[direction].length ? previous[direction] : [];
       }
     }
     if (configurationBox) {
@@ -280,8 +256,7 @@ function createConfigurator(useTransformations) {
     }
   }
 
-  const { box: labeledCheckbox } = createLabeledCheckbox('Use transformations?', useTransformations, value => { useTransformations = value; updateConfigurator(); });
-  box.appendChild(labeledCheckbox);
+  globalEvents.on('saveConfiguration', () => console.log(JSON.stringify(Object.fromEntries(Object.entries(configuration).map(([key, value]) => [key.split('/').pop(), value])))));
 
   box.appendChild(itemsBox);
 
@@ -322,19 +297,15 @@ function createConfigurator(useTransformations) {
     clearItems();
     resetConfigurationBox();
     addItems(items);
-    for (const item in presetConfiguration) {
-      configuration[item] = {};
-      for (const direction in presetConfiguration[item]) {
-        configuration[item][direction] = {};
-        for (const key in presetConfiguration[item][direction]) {
-          configuration[item][direction][key] = presetConfiguration[item][direction][key];
-        }
-      }
+    if (Object.keys(presetConfiguration).length) {
+      configuration = { ...presetConfiguration };
+    } else {
+      updateConfigurator();
     }
   };
 
   document.body.appendChild(box);
-  return { configuration, clearItems, fromPreset, addItem, addItems, removeItem, removeItems, box, updateConfigurator, resetConfigurationBox };
+  return { getConfiguration, clearItems, fromPreset, addItem, addItems, removeItem, removeItems, box, updateConfigurator, resetConfigurationBox };
 }
 
 function createEvents() {
