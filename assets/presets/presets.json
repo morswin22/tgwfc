@@ -8,5 +8,10 @@
     "nSize": 32,
     "dataset": ["barrel-broken.png", "barrel.png", "none.png", "pole-bottom.png", "pole-middle.png", "pole-top.png", "rocks-bottom-left.png", "rocks-bottom-right.png", "rocks-left.png", "rocks-none.png", "rocks-right.png", "rocks-rock.png", "rocks-top-left.png", "rocks-top-right.png", "rocks-top.png", "torch.png"],
     "configuration": {"barrel-broken.png":{"n":["l"],"e":["g","y"],"s":["r"],"w":["g","y"]},"barrel.png":{"n":["l"],"e":["g","y"],"s":["r"],"w":["g","y"]},"none.png":{"n":["l"],"e":["g","y"],"s":["r","l"],"w":["g","y"]},"pole-bottom.png":{"n":["p"],"e":["g","y"],"s":["r"],"w":["g","y"]},"pole-middle.png":{"n":["p"],"e":["g","y"],"s":["p"],"w":["g","y"]},"pole-top.png":{"n":["l"],"e":["g","y"],"s":["p"],"w":["g","y"]},"rocks-bottom-left.png":{"n":["b"],"e":["b"],"s":["w"],"w":["w"]},"rocks-bottom-right.png":{"n":["b"],"e":["w"],"s":["w"],"w":["b"]},"rocks-left.png":{"n":["b"],"e":["w"],"s":["b"],"w":["y"]},"rocks-none.png":{"n":["w"],"e":["w"],"s":["w"],"w":["w"]},"rocks-right.png":{"n":["b"],"e":["g"],"s":["b"],"w":["w"]},"rocks-rock.png":{"n":["w"],"e":["w"],"s":["w"],"w":["w"]},"rocks-top-left.png":{"n":["r"],"e":["b"],"s":["b"],"w":["y"]},"rocks-top-right.png":{"n":["r"],"e":["g"],"s":["b"],"w":["b"]},"rocks-top.png":{"n":["r"],"e":["b"],"s":["w"],"w":["b"]},"torch.png":{"n":["l"],"e":["g","y"],"s":["r","l"],"w":["g","y"]}}
+  },
+  "circuit": {
+    "nSize": 28,
+    "dataset": ["board.png", "bridge-conn-b.png", "bridge-conn-l.png", "bridge-conn-r.png", "bridge-conn-t.png", "bridge-cross-h.png", "bridge-cross-v.png", "bridge-h.png", "bridge-v.png", "chip-conn-b.png", "chip-conn-l.png", "chip-conn-r.png", "chip-conn-t.png", "chip-corner-0.png", "chip-corner-1.png", "chip-corner-2.png", "chip-corner-3.png", "chip.png", "solder-end-b.png", "solder-end-l.png", "solder-end-r.png", "solder-end-t.png", "solder-middle-h.png", "solder-middle-v.png", "wire-d-1-0.png", "wire-d-1-1.png", "wire-d-1-2.png", "wire-d-1-3.png", "wire-d-2-0.png", "wire-d-2-1.png", "wire-h.png", "wire-t-b.png", "wire-t-l.png", "wire-t-r.png", "wire-t-t.png", "wire-v.png"],
+    "configuration": {}
   }
 }
