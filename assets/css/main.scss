@@ -272,3 +272,18 @@ main {
     cursor: pointer;
   }
 }
+
+::-webkit-scrollbar {
+  width: 1rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background-clip: content-box;
+  border: .3rem solid transparent;
+  border-radius: 1rem;
+  background-color: #666666;
+
+  &:hover {
+    background-color: #444444;
+  }
+}
