@@ -121,9 +121,14 @@ function createPreset(name, fromPreset) {
   const items = [];
   let configuration = {};
 
+  const usePreset = () => {
+    fromPreset(items, configuration);
+    if (globalEvents) globalEvents.emit('reset');
+  }
+
   const usePresetButton = document.createElement('span');
   usePresetButton.innerText = 'Use this preset';
-  usePresetButton.addEventListener('click', () => fromPreset(items, configuration));
+  usePresetButton.addEventListener('click', usePreset);
   box.appendChild(usePresetButton);
 
   const ul = document.createElement('ul');
@@ -152,25 +157,27 @@ function createPreset(name, fromPreset) {
   const applyConfiguration = (baseUrl, name, newConfiguration) => configuration = Object.fromEntries(Object.entries(newConfiguration).map((([key, value]) => [`${baseUrl}/${name}/${key}`, value])));
 
   document.body.appendChild(box);
-  return { box, items, addItem, addItems, applyConfiguration };
+  return { box, items, addItem, addItems, applyConfiguration, usePreset };
 }
 
 function createPresets(url, fromPreset, callback) {
   const box = document.createElement('div');
-  box.classList.add('presets', 'shown');
+  box.classList.add('presets');
   document.body.appendChild(box);
   fetch(url).then(response => response.json()).then(presets => {
+    const presetsHandlers = {};
     const baseUrl = url.split('/').slice(0,-1).join('/');
     for (const name in presets) {
-      const { addItem, applyConfiguration, box: presetBox } = createPreset(name[0].toUpperCase() + name.slice(1), fromPreset);
+      const { addItem, applyConfiguration, box: presetBox, usePreset } = createPreset(name[0].toUpperCase() + name.slice(1), fromPreset);
       for (const path of presets[name].dataset) {
         addItem(`${baseUrl}/${name}/${path}`);
       }
       applyConfiguration(baseUrl, name, presets[name].configuration);
+      presetsHandlers['use' + name.charAt(0).toUpperCase() + name.slice(1)] = usePreset;
       presetBox.remove();
       box.appendChild(presetBox);
     }
-    if (callback) callback();
+    if (callback) callback(presetsHandlers);
   });
   return { box };
 }
@@ -209,7 +216,7 @@ function createConfiguratorBox(name, configuration, resetConfigurationBox) {
 
 function createConfigurator() {
   const box = document.createElement('div');
-  box.classList.add('configurator', 'shown');
+  box.classList.add('configurator');
 
   const label = document.createElement('label');
   label.innerText = 'Configure tiles connectivity';

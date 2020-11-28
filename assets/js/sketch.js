@@ -8,15 +8,17 @@ function setup() {
   generator.on('update', event => redraw = event);
 
   const { fromPreset, getConfiguration } = createConfigurator();
-  createPresets('/assets/presets/presets.json', fromPreset);
+  createPresets('/assets/presets/presets.json', fromPreset, ({ usePipes }) => usePipes());
   
   const { add: addButton } = createMenu();
   addButton('/assets/images/presets.svg', 'Presets', '.presets');
   addButton('/assets/images/generator.svg', 'Generator', '.generator');
   addButton('/assets/images/configurator.svg', 'Configurator', '.configurator');
 
-  generator.resetButton.addEventListener('click', () => generator.setConfiguration(getConfiguration()));
+  generator.resetButton.addEventListener('click', () => globalEvents.emit('reset'));
   generator.solveButton.addEventListener('click', generator.iterate);
+
+  globalEvents.on('reset', () => generator.setConfiguration(getConfiguration()));
 }
 
 function windowResized() {
